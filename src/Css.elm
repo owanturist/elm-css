@@ -1465,10 +1465,8 @@ type alias LengthOrAutoOrCoverOrContain compatible =
 type alias Length compatible units =
     Value
         { compatible
-            | length : Compatible
-            , numericValue : Float
-            , units : units
-            , unitLabel : String
+            | units : units
+            , length : Compatible
         }
 
 
@@ -2044,8 +2042,6 @@ type alias BasicProperty =
         , fontWeight : Compatible
         , fontVariant : Compatible
         , units : IncompatibleUnits
-        , numericValue : Float
-        , unitLabel : String
         , backgroundRepeat : Compatible
         , backgroundRepeatShorthand : Compatible
         , backgroundAttachment : Compatible
@@ -2420,11 +2416,6 @@ true =
 {- LENGTHS -}
 
 
-lengthConverter : String -> Float -> ExplicitLength units
-lengthConverter label value =
-    Value (numberToString value ++ label)
-
-
 {-| Convenience length value that compiles to 0 with no units.
 
     css [ padding zero ]
@@ -2445,8 +2436,6 @@ zero :
         , number : Compatible
         , outline : Compatible
         , units : UnitlessInteger
-        , unitLabel : String
-        , numericValue : Float
         , lengthOrAutoOrCoverOrContain : Compatible
         }
 zero =
@@ -2456,211 +2445,163 @@ zero =
 {-| [`pct`](https://developer.mozilla.org/en-US/docs/Web/CSS/length#pct) units.
 -}
 type alias Pct =
-    ExplicitLength PercentageUnits
+    ExplicitLength { percentage : Compatible }
 
 
 {-| [`pct`](https://developer.mozilla.org/en-US/docs/Web/CSS/length#pct) units.
 -}
 pct : Float -> Pct
-pct =
-    lengthConverter "%"
-
-
-type PercentageUnits
-    = PercentageUnits
+pct value =
+    Value (numberToString value ++ "%")
 
 
 {-| [`em`](https://developer.mozilla.org/en-US/docs/Web/CSS/length#em) units.
 -}
 type alias Em =
-    ExplicitLength EmUnits
+    ExplicitLength { em : Compatible }
 
 
 {-| [`em`](https://developer.mozilla.org/en-US/docs/Web/CSS/length#em) units.
 -}
 em : Float -> Em
-em =
-    lengthConverter "em"
-
-
-type EmUnits
-    = EmUnits
+em value =
+    Value (numberToString value ++ "em")
 
 
 {-| [`ex`](https://developer.mozilla.org/en-US/docs/Web/CSS/length#ex) units.
 -}
 type alias Ex =
-    ExplicitLength ExUnits
+    ExplicitLength { ex : Compatible }
 
 
 {-| [`ex`](https://developer.mozilla.org/en-US/docs/Web/CSS/length#ex) units.
 -}
 ex : Float -> Ex
-ex =
-    lengthConverter "ex"
-
-
-type ExUnits
-    = ExUnits
+ex value =
+    Value (numberToString value ++ "ex")
 
 
 {-| [`ch`](https://developer.mozilla.org/en-US/docs/Web/CSS/length#ch) units.
 -}
 type alias Ch =
-    ExplicitLength ChUnits
+    ExplicitLength { ch : Compatible }
 
 
 {-| [`ch`](https://developer.mozilla.org/en-US/docs/Web/CSS/length#ch) units.
 -}
 ch : Float -> Ch
-ch =
-    lengthConverter "ch"
-
-
-type ChUnits
-    = ChUnits
+ch value =
+    Value (numberToString value ++ "ch")
 
 
 {-| [`rem`](https://developer.mozilla.org/en-US/docs/Web/CSS/length#rem) units.
 -}
 type alias Rem =
-    ExplicitLength RemUnits
+    ExplicitLength { rem : Compatible }
 
 
 {-| [`rem`](https://developer.mozilla.org/en-US/docs/Web/CSS/length#rem) units.
 -}
 rem : Float -> Rem
-rem =
-    lengthConverter "rem"
-
-
-type RemUnits
-    = RemUnits
+rem value =
+    Value (numberToString value ++ "rem")
 
 
 {-| [`vh`](https://developer.mozilla.org/en-US/docs/Web/CSS/length#vh) units.
 -}
 type alias Vh =
-    ExplicitLength VhUnits
+    ExplicitLength { vk : Compatible }
 
 
 {-| [`vh`](https://developer.mozilla.org/en-US/docs/Web/CSS/length#vh) units.
 -}
 vh : Float -> Vh
-vh =
-    lengthConverter "vh"
-
-
-type VhUnits
-    = VhUnits
+vh value =
+    Value (numberToString value ++ "vh")
 
 
 {-| [`vw`](https://developer.mozilla.org/en-US/docs/Web/CSS/length#vw) units.
 -}
 type alias Vw =
-    ExplicitLength VwUnits
+    ExplicitLength { vw : Compatible }
 
 
 {-| [`vw`](https://developer.mozilla.org/en-US/docs/Web/CSS/length#vw) units.
 -}
 vw : Float -> Vw
-vw =
-    lengthConverter "vw"
-
-
-type VwUnits
-    = VwUnits
+vw value =
+    Value (numberToString value ++ "vw")
 
 
 {-| [`vmin`](https://developer.mozilla.org/en-US/docs/Web/CSS/length#vmin) units.
 -}
 type alias Vmin =
-    ExplicitLength VMinUnits
+    ExplicitLength { vmin : Compatible }
 
 
 {-| [`vmin`](https://developer.mozilla.org/en-US/docs/Web/CSS/length#vmin) units.
 -}
 vmin : Float -> Vmin
-vmin =
-    lengthConverter "vmin"
-
-
-type VMinUnits
-    = VMinUnits
+vmin value =
+    Value (numberToString value ++ "vmin")
 
 
 {-| [`vmax`](https://developer.mozilla.org/en-US/docs/Web/CSS/length#vmax) units.
 -}
 type alias Vmax =
-    ExplicitLength VMaxUnits
+    ExplicitLength { vmax : Compatible }
 
 
 {-| [`vmax`](https://developer.mozilla.org/en-US/docs/Web/CSS/length#vmax) units.
 -}
 vmax : Float -> Vmax
-vmax =
-    lengthConverter "vmax"
-
-
-type VMaxUnits
-    = VMaxUnits
+vmax value =
+    Value (numberToString value ++ "vmax")
 
 
 {-| [`px`](https://developer.mozilla.org/en-US/docs/Web/CSS/length#px) units.
 -}
 type alias Px =
-    ExplicitLength PxUnits
+    ExplicitLength { px : Compatible }
 
 
 {-| [`px`](https://developer.mozilla.org/en-US/docs/Web/CSS/length#px) units.
 -}
 px : Float -> Px
-px =
-    lengthConverter "px"
-
-
-type PxUnits
-    = PxUnits
+px value =
+    Value (numberToString value ++ "px")
 
 
 {-| [``](<https://developer.mozilla.org/en-US/docs/Web/CSS/length#mm>) units.
 -}
 type alias Mm =
-    ExplicitLength MMUnits
+    ExplicitLength { mm : Compatible }
 
 
 {-| [``](<https://developer.mozilla.org/en-US/docs/Web/CSS/length#mm>) units.
 -}
 mm : Float -> Mm
-mm =
-    lengthConverter "mm"
-
-
-type MMUnits
-    = MMUnits
+mm value =
+    Value (numberToString value ++ "mm")
 
 
 {-| [`cm`](https://developer.mozilla.org/en-US/docs/Web/CSS/length#cm) units.
 -}
 type alias Cm =
-    ExplicitLength CMUnits
+    ExplicitLength { cm : Compatible }
 
 
 {-| [`cm`](https://developer.mozilla.org/en-US/docs/Web/CSS/length#cm) units.
 -}
 cm : Float -> Cm
-cm =
-    lengthConverter "cm"
-
-
-type CMUnits
-    = CMUnits
+cm value =
+    Value (numberToString value ++ "cm")
 
 
 {-| [`in`](https://developer.mozilla.org/en-US/docs/Web/CSS/length#in) units.
 -}
 type alias In =
-    ExplicitLength InchUnits
+    ExplicitLength { inches : Compatible }
 
 
 {-| [`in`](https://developer.mozilla.org/en-US/docs/Web/CSS/length#in) units.
@@ -2669,80 +2610,68 @@ type alias In =
 
 -}
 inches : Float -> In
-inches =
-    lengthConverter "in"
-
-
-type InchUnits
-    = InchUnits
+inches value =
+    Value (numberToString value ++ "in")
 
 
 {-| [`pt`](https://developer.mozilla.org/en-US/docs/Web/CSS/length#pt) units.
 -}
 type alias Pt =
-    ExplicitLength PtUnits
+    ExplicitLength { pt : Compatible }
 
 
 {-| [`pt`](https://developer.mozilla.org/en-US/docs/Web/CSS/length#pt) units.
 -}
 pt : Float -> Pt
-pt =
-    lengthConverter "pt"
-
-
-type PtUnits
-    = PtUnits
+pt value =
+    Value (numberToString value ++ "pt")
 
 
 {-| [`pc`](https://developer.mozilla.org/en-US/docs/Web/CSS/length#pc) units.
 -}
 type alias Pc =
-    ExplicitLength PcUnits
+    ExplicitLength { pc : Compatible }
 
 
 {-| [`pc`](https://developer.mozilla.org/en-US/docs/Web/CSS/length#pc) units.
 -}
 pc : Float -> Pc
-pc =
-    lengthConverter "pc"
-
-
-type PcUnits
-    = PcUnits
+pc value =
+    Value (numberToString value ++ "pc")
 
 
 {-| A unitless integer. Useful with properties like [`borderImageOutset`](#borderImageOutset)
 which accept either length units or unitless numbers for some properties.
 -}
-int : Int -> IntOrAuto (LengthOrNumberOrAutoOrNoneOrContent (LengthOrNumber (FontWeight (Number { numericValue : Float, unitLabel : String, units : UnitlessInteger }))))
+int : Int -> IntOrAuto (LengthOrNumberOrAutoOrNoneOrContent (LengthOrNumber (FontWeight (Number { units : UnitlessInteger }))))
 int val =
     Value (numberToString val)
 
 
-type UnitlessInteger
-    = UnitlessInteger
+type alias UnitlessInteger =
+    { integer : Compatible }
 
 
 {-| A unitless number. Useful with properties like [`flexGrow`](#flexGrow)
 which accept unitless numbers.
 -}
-num : Float -> LengthOrNumberOrAutoOrNoneOrContent (LengthOrNumber (Number { numericValue : Float, unitLabel : String, units : UnitlessFloat }))
+num : Float -> LengthOrNumberOrAutoOrNoneOrContent (LengthOrNumber (Number { units : UnitlessFloat }))
 num val =
     Value (numberToString val)
 
 
-type UnitlessFloat
-    = UnitlessFloat
+type alias UnitlessFloat =
+    { float : Compatible }
 
 
 lengthForOverloadedProperty : ExplicitLength IncompatibleUnits
 lengthForOverloadedProperty =
-    lengthConverter "" 0
+    Value (numberToString 0)
 
 
 {-| -}
-type IncompatibleUnits
-    = IncompatibleUnits
+type alias IncompatibleUnits =
+    { incompatible : Compatible }
 
 
 

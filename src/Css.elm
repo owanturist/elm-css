@@ -1040,7 +1040,7 @@ deprecated or discouraged.
 
 import Css.Helpers exposing (identifierToString, toCssIdentifier)
 import Css.Preprocess as Preprocess exposing (Style, unwrapSnippet)
-import Css.Structure as Structure exposing (..)
+import Css.Structure as Structure exposing (Property)
 import Hex
 import Regex exposing (regex)
 import String
@@ -1809,12 +1809,7 @@ a `visible` [`visibility`](https://developer.mozilla.org/en-US/docs/Web/CSS/visi
 a `visible` [`overflow`](https://developer.mozilla.org/en-US/docs/Web/CSS/overflow#Values), or
 a `visible` [`pointer-events`](https://developer.mozilla.org/en-US/docs/Web/CSS/pointer-events) value.
 -}
-visible :
-    Value
-        { overflow : Compatible
-        , visibility : Compatible
-        , pointerEvents : Compatible
-        }
+visible : Value { overflow : Compatible, visibility : Compatible, pointerEvents : Compatible }
 visible =
     Value "visible"
 
@@ -1963,7 +1958,7 @@ luminosity =
 
 {-| The `padding-box` [`background-clip`](https://developer.mozilla.org/en-US/docs/Web/CSS/background-clip) value.
 -}
-paddingBox : BackgroundClip {}
+paddingBox : BackgroundClip compatible
 paddingBox =
     Value "padding-box"
 
@@ -1995,7 +1990,7 @@ This can also represent a `hidden` [border style](https://developer.mozilla.org/
 as well as a `hidden` [`visibility`](https://developer.mozilla.org/en-US/docs/Web/CSS/visibility#Values).
 
 -}
-hidden : Overflow (BorderStyle (Visibility {}))
+hidden : Value { overflow : Compatible, borderStyle : Compatible, visibility : Compatible }
 hidden =
     Value "hidden"
 
@@ -2285,28 +2280,28 @@ wavy =
 
 {-| A `dotted` [border style](https://developer.mozilla.org/en-US/docs/Web/CSS/border-style#Values).
 -}
-dotted : BorderStyle (TextDecorationStyle {})
+dotted : Value { borderStyle : Compatible, textDecorationStyle : Compatible }
 dotted =
     Value "dotted"
 
 
 {-| A `dashed` [border style](https://developer.mozilla.org/en-US/docs/Web/CSS/border-style#Values).
 -}
-dashed : BorderStyle (TextDecorationStyle {})
+dashed : Value { borderStyle : Compatible, textDecorationStyle : Compatible }
 dashed =
     Value "dashed"
 
 
 {-| A `solid` [border style](https://developer.mozilla.org/en-US/docs/Web/CSS/border-style#Values).
 -}
-solid : BorderStyle (TextDecorationStyle {})
+solid : Value { borderStyle : Compatible, textDecorationStyle : Compatible }
 solid =
     Value "solid"
 
 
 {-| A `double` [border style](https://developer.mozilla.org/en-US/docs/Web/CSS/border-style#Values).
 -}
-double : BorderStyle (TextDecorationStyle {})
+double : Value { borderStyle : Compatible, textDecorationStyle : Compatible }
 double =
     Value "double"
 
@@ -2353,7 +2348,7 @@ separate =
 {-| A `collapse` [border-collapse](https://developer.mozilla.org/en-US/docs/Web/CSS/border-collapse#Values).
 This can also represent a `collapse` [`visibility`](https://developer.mozilla.org/en-US/docs/Web/CSS/visibility#Values).
 -}
-collapse : BorderCollapse (Visibility {})
+collapse : Value { borderCollapse : Compatible, visibility : Compatible }
 collapse =
     Value "collapse"
 
@@ -2510,7 +2505,7 @@ rem value =
 {-| [`vh`](https://developer.mozilla.org/en-US/docs/Web/CSS/length#vh) units.
 -}
 type alias Vh =
-    ExplicitLength { vk : Compatible }
+    ExplicitLength { vh : Compatible }
 
 
 {-| [`vh`](https://developer.mozilla.org/en-US/docs/Web/CSS/length#vh) units.
@@ -2643,25 +2638,35 @@ pc value =
 {-| A unitless integer. Useful with properties like [`borderImageOutset`](#borderImageOutset)
 which accept either length units or unitless numbers for some properties.
 -}
-int : Int -> IntOrAuto (LengthOrNumberOrAutoOrNoneOrContent (LengthOrNumber (FontWeight (Number { units : UnitlessInteger }))))
+int : Int -> UnitlessInteger
 int val =
     Value (numberToString val)
 
 
 type alias UnitlessInteger =
-    { integer : Compatible }
+    Value
+        { intOrAuto : Compatible
+        , lengthOrNumberOrAutoOrNoneOrContent : Compatible
+        , lengthOrNumber : Compatible
+        , fontWeight : Compatible
+        , number : Compatible
+        }
 
 
 {-| A unitless number. Useful with properties like [`flexGrow`](#flexGrow)
 which accept unitless numbers.
 -}
-num : Float -> LengthOrNumberOrAutoOrNoneOrContent (LengthOrNumber (Number { units : UnitlessFloat }))
+num : Float -> UnitlessFloat
 num val =
     Value (numberToString val)
 
 
 type alias UnitlessFloat =
-    { float : Compatible }
+    Value
+        { lengthOrNumberOrAutoOrNoneOrContent : Compatible
+        , lengthOrNumber : Compatible
+        , number : Compatible
+        }
 
 
 lengthForOverloadedProperty : ExplicitLength IncompatibleUnits
@@ -2678,35 +2683,42 @@ type alias IncompatibleUnits =
 {- ANGLES -}
 
 
-angleConverter : String -> number -> AngleOrDirection (Angle {})
+type alias AngleWithDirection =
+    Value
+        { angleOrDirection : Compatible
+        , angle : Compatible
+        }
+
+
+angleConverter : String -> number -> AngleWithDirection
 angleConverter suffix num =
     Value (numberToString num ++ suffix)
 
 
 {-| [`deg`](https://developer.mozilla.org/en-US/docs/Web/CSS/angle#deg) units.
 -}
-deg : number -> AngleOrDirection (Angle {})
+deg : number -> AngleWithDirection
 deg =
     angleConverter "deg"
 
 
 {-| [`grad`](https://developer.mozilla.org/en-US/docs/Web/CSS/angle#grad) units.
 -}
-grad : number -> AngleOrDirection (Angle {})
+grad : number -> AngleWithDirection
 grad =
     angleConverter "grad"
 
 
 {-| [`rad`](https://developer.mozilla.org/en-US/docs/Web/CSS/angle#rad) units.
 -}
-rad : number -> AngleOrDirection (Angle {})
+rad : number -> AngleWithDirection
 rad =
     angleConverter "rad"
 
 
 {-| [`turn`](https://developer.mozilla.org/en-US/docs/Web/CSS/angle#tr) units.
 -}
-turn : number -> AngleOrDirection (Angle {})
+turn : number -> AngleWithDirection
 turn =
     angleConverter "turn"
 
@@ -3008,7 +3020,7 @@ fillBox =
 {-| The `content-box` value for the [`box-sizing`](https://developer.mozilla.org/en-US/docs/Web/CSS/box-sizing) property.
 Can also be used as `content-box` value for the [`background-clip`](https://developer.mozilla.org/en-US/docs/Web/CSS/background-clip) property.
 -}
-contentBox : BoxSizing (BackgroundClip {})
+contentBox : Value { boxSizing : Compatible, backgroundClip : Compatible }
 contentBox =
     Value "content-box"
 
@@ -3016,7 +3028,7 @@ contentBox =
 {-| The `border-box` value for the [`box-sizing`](https://developer.mozilla.org/en-US/docs/Web/CSS/box-sizing) property.
 Can also be used as `border-box` value for the [`background-clip`](https://developer.mozilla.org/en-US/docs/Web/CSS/background-clip) property.
 -}
-borderBox : BoxSizing (BackgroundClip {})
+borderBox : Value { boxSizing : Compatible, backgroundClip : Compatible }
 borderBox =
     Value "border-box"
 
@@ -3077,14 +3089,21 @@ listStylePosition =
     prop1 "list-style-position"
 
 
+type alias ListStyleWithPosition =
+    Value
+        { listStylePosition : Compatible
+        , listStyleTypeOrPositionOrImage : Compatible
+        }
+
+
 {-| -}
-inside : ListStyle (ListStylePosition {})
+inside : ListStyleWithPosition
 inside =
     Value "inside"
 
 
 {-| -}
-outside : ListStyle (ListStylePosition {})
+outside : ListStyleWithPosition
 outside =
     Value "outside"
 
@@ -3100,182 +3119,189 @@ listStyleType =
     prop1 "list-style-type"
 
 
+type alias ListStyleWithType =
+    Value
+        { listStyleType : Compatible
+        , listStyleTypeOrPositionOrImage : Compatible
+        }
+
+
 {-| -}
-disc : ListStyle (ListStyleType {})
+disc : ListStyleWithType
 disc =
     Value "disc"
 
 
 {-| -}
-circle : ListStyle (ListStyleType {})
+circle : ListStyleWithType
 circle =
     Value "circle"
 
 
 {-| -}
-square : ListStyle (ListStyleType {})
+square : ListStyleWithType
 square =
     Value "square"
 
 
 {-| -}
-decimal : ListStyle (ListStyleType {})
+decimal : ListStyleWithType
 decimal =
     Value "decimal"
 
 
 {-| -}
-decimalLeadingZero : ListStyle (ListStyleType {})
+decimalLeadingZero : ListStyleWithType
 decimalLeadingZero =
     Value "decimal-leading-zero"
 
 
 {-| -}
-lowerRoman : ListStyle (ListStyleType {})
+lowerRoman : ListStyleWithType
 lowerRoman =
     Value "lower-roman"
 
 
 {-| -}
-upperRoman : ListStyle (ListStyleType {})
+upperRoman : ListStyleWithType
 upperRoman =
     Value "upper-roman"
 
 
 {-| -}
-lowerGreek : ListStyle (ListStyleType {})
+lowerGreek : ListStyleWithType
 lowerGreek =
     Value "lower-greek"
 
 
 {-| -}
-upperGreek : ListStyle (ListStyleType {})
+upperGreek : ListStyleWithType
 upperGreek =
     Value "upper-greek"
 
 
 {-| -}
-lowerAlpha : ListStyle (ListStyleType {})
+lowerAlpha : ListStyleWithType
 lowerAlpha =
     Value "lower-alpha"
 
 
 {-| -}
-upperAlpha : ListStyle (ListStyleType {})
+upperAlpha : ListStyleWithType
 upperAlpha =
     Value "upper-alpha"
 
 
 {-| -}
-lowerLatin : ListStyle (ListStyleType {})
+lowerLatin : ListStyleWithType
 lowerLatin =
     Value "lower-latin"
 
 
 {-| -}
-upperLatin : ListStyle (ListStyleType {})
+upperLatin : ListStyleWithType
 upperLatin =
     Value "upper-latin"
 
 
 {-| -}
-arabicIndic : ListStyle (ListStyleType {})
+arabicIndic : ListStyleWithType
 arabicIndic =
     Value "arabic-indic"
 
 
 {-| -}
-armenian : ListStyle (ListStyleType {})
+armenian : ListStyleWithType
 armenian =
     Value "armenian"
 
 
 {-| -}
-bengali : ListStyle (ListStyleType {})
+bengali : ListStyleWithType
 bengali =
     Value "bengali"
 
 
 {-| -}
-cjkEarthlyBranch : ListStyle (ListStyleType {})
+cjkEarthlyBranch : ListStyleWithType
 cjkEarthlyBranch =
     Value "cjk-earthly-branch"
 
 
 {-| -}
-cjkHeavenlyStem : ListStyle (ListStyleType {})
+cjkHeavenlyStem : ListStyleWithType
 cjkHeavenlyStem =
     Value "cjk-heavenly-stem"
 
 
 {-| -}
-devanagari : ListStyle (ListStyleType {})
+devanagari : ListStyleWithType
 devanagari =
     Value "devanagari"
 
 
 {-| -}
-georgian : ListStyle (ListStyleType {})
+georgian : ListStyleWithType
 georgian =
     Value "georgian"
 
 
 {-| -}
-gujarati : ListStyle (ListStyleType {})
+gujarati : ListStyleWithType
 gujarati =
     Value "gujarati"
 
 
 {-| -}
-gurmukhi : ListStyle (ListStyleType {})
+gurmukhi : ListStyleWithType
 gurmukhi =
     Value "gurmukhi"
 
 
 {-| -}
-kannada : ListStyle (ListStyleType {})
+kannada : ListStyleWithType
 kannada =
     Value "kannada"
 
 
 {-| -}
-khmer : ListStyle (ListStyleType {})
+khmer : ListStyleWithType
 khmer =
     Value "khmer"
 
 
 {-| -}
-lao : ListStyle (ListStyleType {})
+lao : ListStyleWithType
 lao =
     Value "lao"
 
 
 {-| -}
-malayalam : ListStyle (ListStyleType {})
+malayalam : ListStyleWithType
 malayalam =
     Value "malayalam"
 
 
 {-| -}
-myanmar : ListStyle (ListStyleType {})
+myanmar : ListStyleWithType
 myanmar =
     Value "myanmar"
 
 
 {-| -}
-oriya : ListStyle (ListStyleType {})
+oriya : ListStyleWithType
 oriya =
     Value "oriya"
 
 
 {-| -}
-telugu : ListStyle (ListStyleType {})
+telugu : ListStyleWithType
 telugu =
     Value "telugu"
 
 
 {-| -}
-thai : ListStyle (ListStyleType {})
+thai : ListStyleWithType
 thai =
     Value "thai"
 
@@ -3460,7 +3486,7 @@ order =
 {-| The [`content`](https://developer.mozilla.org/en-US/docs/Web/CSS/flex-basis#Values) value for the
 flex-basis property.
 -}
-content : LengthOrNumberOrAutoOrNoneOrContent (FlexBasis {})
+content : Value { flexBasis : Compatible, lengthOrNumberOrAutoOrNoneOrContent : Compatible }
 content =
     Value "content"
 
@@ -3468,7 +3494,7 @@ content =
 {-| The[`wrap`](https://developer.mozilla.org/en-US/docs/Web/CSS/flex-wrap#Values) value for the
 flex-wrap property.
 -}
-wrap : FlexDirectionOrWrap (FlexWrap {})
+wrap : Value { flexWrap : Compatible, flexDirectionOrWrap : Compatible }
 wrap =
     Value "wrap"
 
@@ -3476,7 +3502,7 @@ wrap =
 {-| The[`wrap-reverse`](https://developer.mozilla.org/en-US/docs/Web/CSS/flex-wrap#Values) value for the
 flex-wrap property.
 -}
-wrapReverse : FlexDirectionOrWrap (FlexWrap {})
+wrapReverse : Value { flexWrap : Compatible, flexDirectionOrWrap : Compatible }
 wrapReverse =
     Value "wrap-reverse"
 
@@ -3526,7 +3552,7 @@ stretch =
 {-| The[`row`](<https://developer.mozilla.org/en-US/docs/Web/CSS/flex-direction> #Values) value for the
 flex-direction property.
 -}
-row : FlexDirectionOrWrap (FlexDirection {})
+row : Value { flexDirection : Compatible, flexDirectionOrWrap : Compatible }
 row =
     Value "row"
 
@@ -3534,7 +3560,7 @@ row =
 {-| The[`row-reverse`](<https://developer.mozilla.org/en-US/docs/Web/CSS/flex-direction> #Values) value for the
 flex-direction property.
 -}
-rowReverse : FlexDirectionOrWrap (FlexDirection {})
+rowReverse : Value { flexDirection : Compatible, flexDirectionOrWrap : Compatible }
 rowReverse =
     Value "row-reverse"
 
@@ -3542,7 +3568,7 @@ rowReverse =
 {-| The[`column`](<https://developer.mozilla.org/en-US/docs/Web/CSS/flex-direction> #Values) value for the
 flex-direction property.
 -}
-column : FlexDirectionOrWrap (FlexDirection {})
+column : Value { flexDirection : Compatible, flexDirectionOrWrap : Compatible }
 column =
     Value "column"
 
@@ -3550,7 +3576,7 @@ column =
 {-| The[`column-reverse`](<https://developer.mozilla.org/en-US/docs/Web/CSS/flex-direction> #Values) value for the
 flex-direction property.
 -}
-columnReverse : FlexDirectionOrWrap (FlexDirection {})
+columnReverse : Value { flexDirection : Compatible, flexDirectionOrWrap : Compatible }
 columnReverse =
     Value "column-reverse"
 
@@ -3656,7 +3682,7 @@ linearGradient :
     ColorStop compatible unit
     -> ColorStop compatible unit
     -> List (ColorStop compatible unit)
-    -> BackgroundImage (ListStyle {})
+    -> Value { backgroundImage : Compatible, listStyleTypeOrPositionOrImage : Compatible }
 linearGradient stop1 stop2 stops =
     -- TODO we should make this more permissive, e.g. compatibleA/compatibleB/compatibleC/compatibleD
     -- the only reason it isn't is that we happen to be using collectStops like this.
@@ -3680,7 +3706,7 @@ linearGradient2 :
     -> ColorStop compatibleB unit
     -> ColorStop compatibleB unit
     -> List (ColorStop compatibleB unit)
-    -> BackgroundImage (ListStyle {})
+    -> Value { backgroundImage : Compatible, listStyleTypeOrPositionOrImage : Compatible }
 linearGradient2 (Value dir) stop1 stop2 stops =
     stop1
         :: stop2
@@ -3940,7 +3966,12 @@ auto =
 
 
 {-| -}
-noWrap : WhiteSpace (FlexDirectionOrWrap (FlexWrap {}))
+noWrap :
+    Value
+        { whiteSpace : Compatible
+        , flexWrap : Compatible
+        , flexDirectionOrWrap : Compatible
+        }
 noWrap =
     Value "nowrap"
 
@@ -6487,7 +6518,7 @@ fontFamilies =
     fontFeatureSettings (featureTag2 "swsh" 2)
 
 -}
-fontFeatureSettings : FeatureTagValue a -> Style
+fontFeatureSettings : FeatureTagValue compatible -> Style
 fontFeatureSettings (Value value) =
     property "font-feature-settings" value
 
@@ -6497,7 +6528,7 @@ fontFeatureSettings (Value value) =
     fontFeatureSettingsList [featureTag "c2sc", featureTag "smcp"]
 
 -}
-fontFeatureSettingsList : List (FeatureTagValue a) -> Style
+fontFeatureSettingsList : List (FeatureTagValue compatible) -> Style
 fontFeatureSettingsList featureTagValues =
     featureTagValues
         |> List.map (\(Value value) -> value)
@@ -6511,7 +6542,7 @@ fontFeatureSettingsList featureTagValues =
     fontSize  (px 12)
 
 -}
-fontSize : FontSize a -> Style
+fontSize : FontSize compatible -> Style
 fontSize =
     prop1 "font-size"
 
@@ -6521,7 +6552,7 @@ fontSize =
     fontStyle  italic
 
 -}
-fontStyle : FontStyle a -> Style
+fontStyle : FontStyle compatible -> Style
 fontStyle =
     prop1 "font-style"
 
@@ -6532,7 +6563,7 @@ fontStyle =
     fontWeight  (int 300)
 
 -}
-fontWeight : FontWeight a -> Style
+fontWeight : FontWeight compatible -> Style
 fontWeight (Value value) =
     property "font-weight" value
 
@@ -6545,7 +6576,7 @@ fontWeight (Value value) =
     fontVariants  [ oldstyleNums tabularNums stackedFractions ordinal slashedZero ]
 
 -}
-fontVariant : FontVariant a -> Style
+fontVariant : FontVariant compatible -> Style
 fontVariant =
     prop1 "font-variant"
 
@@ -6563,19 +6594,19 @@ fontVariant3 =
 
 
 {-| -}
-fontVariantLigatures : FontVariantLigatures a -> Style
+fontVariantLigatures : FontVariantLigatures compatible -> Style
 fontVariantLigatures =
     prop1 "font-variant-ligatures"
 
 
 {-| -}
-fontVariantCaps : FontVariantCaps a -> Style
+fontVariantCaps : FontVariantCaps compatible -> Style
 fontVariantCaps =
     prop1 "font-variant-caps"
 
 
 {-| -}
-fontVariantNumeric : FontVariantNumeric a -> Style
+fontVariantNumeric : FontVariantNumeric compatible -> Style
 fontVariantNumeric =
     prop1 "font-variant-numeric"
 
@@ -6835,7 +6866,7 @@ You can specify multiple line decorations with `textDecorations`.
     textDecorations3 [ underline, overline ] wavy (rgb 128 64 32)
 
 -}
-textDecoration : TextDecorationLine a -> Style
+textDecoration : TextDecorationLine compatible -> Style
 textDecoration =
     prop1 "text-decoration"
 
@@ -7509,7 +7540,7 @@ numericalPercentageToString value =
     value |> (*) 100 |> numberToString |> flip (++) "%"
 
 
-valuesOrNone : List (Value compatible) -> Value {}
+valuesOrNone : List (Value compatible) -> Value compatible
 valuesOrNone list =
     if List.isEmpty list then
         Value "none"
@@ -7520,7 +7551,7 @@ valuesOrNone list =
             |> Value
 
 
-stringsToValue : List String -> Value {}
+stringsToValue : List String -> Value compatible
 stringsToValue list =
     if List.isEmpty list then
         Value "none"

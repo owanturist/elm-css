@@ -20,6 +20,7 @@ module Css
         , Cm
         , Color
         , ColorStop
+        , ColorValue
         , Compatible
         , Cursor
         , Directionality
@@ -59,7 +60,6 @@ module Css
         , ListStyleType
         , MinMaxDimension
         , Mm
-        , NonMixable
         , None
         , Number
         , Outline
@@ -1020,7 +1020,7 @@ functions let you define custom properties and selectors, respectively.
 @docs listStyle, listStyle2, listStyle3
 @docs linearGradient, linearGradient2, stop, stop2, toBottom, toBottomLeft, toBottomRight, toLeft, toRight, toTop, toTopLeft, toTopRight
 
-@docs AlignItems, All, Angle, AngleOrDirection, BackgroundAttachment, BackgroundClip, BackgroundImage, BackgroundOrigin, BackgroundRepeat, BackgroundRepeatShorthand, BasicProperty, BorderCollapse, BorderStyle, BoxSizing, Calc, CalcExpression, Cursor, Directionality, Display, ExplicitLength, FeatureTagValue, FlexBasis, FlexDirection, FlexDirectionOrWrap, FlexWrap, FontFamily, FontStyle, FontStyleOrFeatureTagValue, FontVariant, FontVariantCaps, FontVariantLigatures, FontVariantNumeric, FontWeight, ImportType, IncompatibleUnits, JustifyContent, LengthOrAuto, LengthOrAutoOrCoverOrContain, LengthOrMinMaxDimension, LengthOrNone, LengthOrNoneOrMinMaxDimension, LengthOrNumber, LengthOrNumberOrAutoOrNoneOrContent, ListStyle, ListStylePosition, ListStyleType, MinMaxDimension, NonMixable, None, Number, Outline, Overflow, Visibility, Position, Resize, TableLayout, TextDecorationLine, TextDecorationStyle, TextIndent, TextOrientation, TextOverflow, TextRendering, TextTransform, TouchAction, Transform, TransformBox, TransformStyle, Value, VerticalAlign, WhiteSpace, Wrap, pre, preLine, preWrap
+@docs AlignItems, All, Angle, AngleOrDirection, BackgroundAttachment, BackgroundClip, BackgroundImage, BackgroundOrigin, BackgroundRepeat, BackgroundRepeatShorthand, BasicProperty, BorderCollapse, BorderStyle, BoxSizing, Calc, CalcExpression, Cursor, Directionality, Display, ExplicitLength, FeatureTagValue, FlexBasis, FlexDirection, FlexDirectionOrWrap, FlexWrap, FontFamily, FontStyle, FontStyleOrFeatureTagValue, FontVariant, FontVariantCaps, FontVariantLigatures, FontVariantNumeric, FontWeight, ImportType, IncompatibleUnits, JustifyContent, LengthOrAuto, LengthOrAutoOrCoverOrContain, LengthOrMinMaxDimension, LengthOrNone, LengthOrNoneOrMinMaxDimension, LengthOrNumber, LengthOrNumberOrAutoOrNoneOrContent, ListStyle, ListStylePosition, ListStyleType, MinMaxDimension, None, Number, Outline, Overflow, Visibility, Position, Resize, TableLayout, TextDecorationLine, TextDecorationStyle, TextIndent, TextOrientation, TextOverflow, TextRendering, TextTransform, TouchAction, Transform, TransformBox, TransformStyle, Value, VerticalAlign, WhiteSpace, Wrap, pre, preLine, preWrap
 
 
 # Types
@@ -1436,17 +1436,6 @@ type alias BackgroundPosition compatible =
     Value { compatible | backgroundPosition : Compatible }
 
 
-{-| Because `color` is both a common propertie and common value
-in CSS (e.g. `color: red` with and `background-blend-mode: color`),
-we implement it as a property (for the `color: red` case) and allow it to
-be used as a value as well. When being used as a value, we call it, expect
-that it will return the desired String as its key, and use that as our value.
-(See `getOverloadedProperty`. Note that `VerticalAlign`.)
--}
-type alias BackgroundBlendMode compatible =
-    ColorValue compatible -> Style
-
-
 {-| <https://developer.mozilla.org/en-US/docs/Web/CSS/background-clip>
 -}
 type alias BackgroundClip compatible =
@@ -1595,26 +1584,6 @@ minus =
     Subtraction
 
 
-combineLengths :
-    (number -> number -> number)
-    -> { r | numericValue : number, unitLabel : String, value : String }
-    -> { r | numericValue : number, unitLabel : String, value : String }
-    -> { r | numericValue : number, unitLabel : String, value : String }
-combineLengths operation first second =
-    let
-        numericValue =
-            operation first.numericValue second.numericValue
-
-        value =
-            [ toString numericValue
-            , first.unitLabel
-            ]
-                |> List.filter (not << String.isEmpty)
-                |> String.join ""
-    in
-    { first | value = value, numericValue = numericValue }
-
-
 {-| <https://developer.mozilla.org/en-US/docs/Web/CSS/length>
 -}
 type alias LengthOrAuto compatible =
@@ -1648,9 +1617,7 @@ type alias LengthOrNumber compatible =
 {-| -}
 type alias ExplicitLength units =
     Value
-        { numericValue : Float
-        , units : units
-        , unitLabel : String
+        { units : units
         , length : Compatible
         , lengthOrAuto : Compatible
         , lengthOrNumber : Compatible
@@ -1824,13 +1791,6 @@ makeImportant str =
         str ++ " !important"
 
 
-{-| A [`ColorValue`](#ColorValue) that does not have `red`, `green`, or `blue`
-values.
--}
-type alias NonMixable =
-    {}
-
-
 {-| A [`transparent`](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value#transparent_keyword) color.
 -}
 transparent : Color
@@ -1907,98 +1867,98 @@ vertical =
 
 {-| The `multiply` [`blend-mode`](https://developer.mozilla.org/en-US/docs/Web/CSS/blend-mode#multiply).
 -}
-multiply : BackgroundBlendMode compatible
+multiply : ColorValue compatible -> Style
 multiply =
     prop1 "multiply"
 
 
 {-| The `screen` [`blend-mode`](https://developer.mozilla.org/en-US/docs/Web/CSS/blend-mode#screen).
 -}
-screenBlendMode : BackgroundBlendMode compatible
+screenBlendMode : ColorValue compatible -> Style
 screenBlendMode =
     prop1 "screen"
 
 
 {-| The `overlay` [`blend-mode`](https://developer.mozilla.org/en-US/docs/Web/CSS/blend-mode#overlay).
 -}
-overlay : BackgroundBlendMode compatible
+overlay : ColorValue compatible -> Style
 overlay =
     prop1 "overlay"
 
 
 {-| The `darken` [`blend-mode`](https://developer.mozilla.org/en-US/docs/Web/CSS/blend-mode#darken).
 -}
-darken : BackgroundBlendMode compatible
+darken : ColorValue compatible -> Style
 darken =
     prop1 "darken"
 
 
 {-| The `lighten` [`blend-mode`](https://developer.mozilla.org/en-US/docs/Web/CSS/blend-mode#lighten).
 -}
-lighten : BackgroundBlendMode compatible
+lighten : ColorValue compatible -> Style
 lighten =
     prop1 "lighten"
 
 
 {-| The `color-dodge` [`blend-mode`](https://developer.mozilla.org/en-US/docs/Web/CSS/blend-mode#color-dodge).
 -}
-colorDodge : BackgroundBlendMode compatible
+colorDodge : ColorValue compatible -> Style
 colorDodge =
     prop1 "color-dodge"
 
 
 {-| The `color-burn` [`blend-mode`](https://developer.mozilla.org/en-US/docs/Web/CSS/blend-mode#color-burn).
 -}
-colorBurn : BackgroundBlendMode compatible
+colorBurn : ColorValue compatible -> Style
 colorBurn =
     prop1 "color-burn"
 
 
 {-| The `hard-light` [`blend-mode`](https://developer.mozilla.org/en-US/docs/Web/CSS/blend-mode#hard-light).
 -}
-hardLight : BackgroundBlendMode compatible
+hardLight : ColorValue compatible -> Style
 hardLight =
     prop1 "hard-light"
 
 
 {-| The `soft-light` [`blend-mode`](https://developer.mozilla.org/en-US/docs/Web/CSS/blend-mode#soft-light).
 -}
-softLight : BackgroundBlendMode compatible
+softLight : ColorValue compatible -> Style
 softLight =
     prop1 "soft-light"
 
 
 {-| The `difference` [`blend-mode`](https://developer.mozilla.org/en-US/docs/Web/CSS/blend-mode#difference).
 -}
-difference : BackgroundBlendMode compatible
+difference : ColorValue compatible -> Style
 difference =
     prop1 "difference"
 
 
 {-| The `exclusion` [`blend-mode`](https://developer.mozilla.org/en-US/docs/Web/CSS/blend-mode#exclusion).
 -}
-exclusion : BackgroundBlendMode compatible
+exclusion : ColorValue compatible -> Style
 exclusion =
     prop1 "exclusion"
 
 
 {-| The `hue` [`blend-mode`](https://developer.mozilla.org/en-US/docs/Web/CSS/blend-mode#hue).
 -}
-hue : BackgroundBlendMode compatible
+hue : ColorValue compatible -> Style
 hue =
     prop1 "hue"
 
 
 {-| The `saturation` [`blend-mode`](https://developer.mozilla.org/en-US/docs/Web/CSS/blend-mode#saturation).
 -}
-saturation : BackgroundBlendMode compatible
+saturation : ColorValue compatible -> Style
 saturation =
     prop1 "saturation"
 
 
 {-| The `luminosity` [`blend-mode`](https://developer.mozilla.org/en-US/docs/Web/CSS/blend-mode#luminosity).
 -}
-luminosity : BackgroundBlendMode compatible
+luminosity : ColorValue compatible -> Style
 luminosity =
     prop1 "luminosity"
 
@@ -2460,26 +2420,9 @@ true =
 {- LENGTHS -}
 
 
-lengthConverter : units -> String -> Float -> ExplicitLength units
-lengthConverter units unitLabel numericValue =
-    { value = numberToString numericValue ++ unitLabel
-    , numericValue = numericValue
-    , units = units
-    , unitLabel = unitLabel
-    , length = Compatible
-    , lengthOrAuto = Compatible
-    , lengthOrNumber = Compatible
-    , lengthOrNone = Compatible
-    , lengthOrMinMaxDimension = Compatible
-    , lengthOrNoneOrMinMaxDimension = Compatible
-    , textIndent = Compatible
-    , flexBasis = Compatible
-    , lengthOrNumberOrAutoOrNoneOrContent = Compatible
-    , fontSize = Compatible
-    , absoluteLength = Compatible
-    , lengthOrAutoOrCoverOrContain = Compatible
-    , calc = Compatible
-    }
+lengthConverter : String -> Float -> ExplicitLength units
+lengthConverter label value =
+    Value (numberToString value ++ label)
 
 
 {-| Convenience length value that compiles to 0 with no units.
@@ -2520,7 +2463,7 @@ type alias Pct =
 -}
 pct : Float -> Pct
 pct =
-    lengthConverter PercentageUnits "%"
+    lengthConverter "%"
 
 
 type PercentageUnits
@@ -2537,7 +2480,7 @@ type alias Em =
 -}
 em : Float -> Em
 em =
-    lengthConverter EmUnits "em"
+    lengthConverter "em"
 
 
 type EmUnits
@@ -2554,7 +2497,7 @@ type alias Ex =
 -}
 ex : Float -> Ex
 ex =
-    lengthConverter ExUnits "ex"
+    lengthConverter "ex"
 
 
 type ExUnits
@@ -2571,7 +2514,7 @@ type alias Ch =
 -}
 ch : Float -> Ch
 ch =
-    lengthConverter ChUnits "ch"
+    lengthConverter "ch"
 
 
 type ChUnits
@@ -2588,7 +2531,7 @@ type alias Rem =
 -}
 rem : Float -> Rem
 rem =
-    lengthConverter RemUnits "rem"
+    lengthConverter "rem"
 
 
 type RemUnits
@@ -2605,7 +2548,7 @@ type alias Vh =
 -}
 vh : Float -> Vh
 vh =
-    lengthConverter VhUnits "vh"
+    lengthConverter "vh"
 
 
 type VhUnits
@@ -2622,7 +2565,7 @@ type alias Vw =
 -}
 vw : Float -> Vw
 vw =
-    lengthConverter VwUnits "vw"
+    lengthConverter "vw"
 
 
 type VwUnits
@@ -2639,7 +2582,7 @@ type alias Vmin =
 -}
 vmin : Float -> Vmin
 vmin =
-    lengthConverter VMinUnits "vmin"
+    lengthConverter "vmin"
 
 
 type VMinUnits
@@ -2656,7 +2599,7 @@ type alias Vmax =
 -}
 vmax : Float -> Vmax
 vmax =
-    lengthConverter VMaxUnits "vmax"
+    lengthConverter "vmax"
 
 
 type VMaxUnits
@@ -2673,7 +2616,7 @@ type alias Px =
 -}
 px : Float -> Px
 px =
-    lengthConverter PxUnits "px"
+    lengthConverter "px"
 
 
 type PxUnits
@@ -2690,7 +2633,7 @@ type alias Mm =
 -}
 mm : Float -> Mm
 mm =
-    lengthConverter MMUnits "mm"
+    lengthConverter "mm"
 
 
 type MMUnits
@@ -2707,7 +2650,7 @@ type alias Cm =
 -}
 cm : Float -> Cm
 cm =
-    lengthConverter CMUnits "cm"
+    lengthConverter "cm"
 
 
 type CMUnits
@@ -2727,7 +2670,7 @@ type alias In =
 -}
 inches : Float -> In
 inches =
-    lengthConverter InchUnits "in"
+    lengthConverter "in"
 
 
 type InchUnits
@@ -2744,7 +2687,7 @@ type alias Pt =
 -}
 pt : Float -> Pt
 pt =
-    lengthConverter PtUnits "pt"
+    lengthConverter "pt"
 
 
 type PtUnits
@@ -2761,7 +2704,7 @@ type alias Pc =
 -}
 pc : Float -> Pc
 pc =
-    lengthConverter PcUnits "pc"
+    lengthConverter "pc"
 
 
 type PcUnits
@@ -2794,7 +2737,7 @@ type UnitlessFloat
 
 lengthForOverloadedProperty : ExplicitLength IncompatibleUnits
 lengthForOverloadedProperty =
-    lengthConverter IncompatibleUnits "" 0
+    lengthConverter "" 0
 
 
 {-| -}

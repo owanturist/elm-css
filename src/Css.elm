@@ -1040,7 +1040,7 @@ deprecated or discouraged.
 
 import Css.Helpers exposing (identifierToString, toCssIdentifier)
 import Css.Preprocess as Preprocess exposing (Style, unwrapSnippet)
-import Css.Structure as Structure exposing (Property)
+import Css.Structure as Structure exposing (Property, Value(Value))
 import Hex
 import Regex exposing (regex)
 import String
@@ -1126,8 +1126,8 @@ type alias Compatible =
 
 
 {-| -}
-type Value compatible
-    = Value String
+type alias Value compatible =
+    Structure.Value compatible
 
 
 {-| -}
@@ -1137,7 +1137,7 @@ type alias All compatible =
 
 {-| -}
 type alias Number compatible =
-    Value { compatible | number : Compatible }
+    Structure.Number compatible
 
 
 {-| -}

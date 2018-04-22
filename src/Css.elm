@@ -3875,7 +3875,6 @@ none :
         , textDecorationLine : Compatible
         , transform : Compatible
         , backgroundImage : Compatible
-        , value : String
         , textTransform : Compatible
         , touchAction : Compatible
         , updateFrequency : Compatible
@@ -3900,7 +3899,6 @@ auto :
         , alignItemsOrAuto : Compatible
         , justifyContentOrAuto : Compatible
         , cursor : Compatible
-        , value : String
         , lengthOrAutoOrCoverOrContain : Compatible
         , intOrAuto : Compatible
         , pointerEvents : Compatible

@@ -1428,11 +1428,7 @@ type alias LengthOrAutoOrCoverOrContain compatible =
 {-| <https://developer.mozilla.org/en-US/docs/Web/CSS/length>
 -}
 type alias Length compatible units =
-    Value
-        { compatible
-            | units : units
-            , length : Compatible
-        }
+    Value { compatible | units : units, length : Compatible }
 
 
 {-| <https://developer.mozilla.org/en/docs/Web/CSS/calc>
@@ -1923,7 +1919,7 @@ luminosity =
 
 {-| The `padding-box` [`background-clip`](https://developer.mozilla.org/en-US/docs/Web/CSS/background-clip) value.
 -}
-paddingBox : BackgroundClip compatible
+paddingBox : BackgroundClip {}
 paddingBox =
     Value "padding-box"
 
@@ -1937,14 +1933,14 @@ url urlValue =
 
 {-| The `cover` [`background-size`](https://developer.mozilla.org/en-US/docs/Web/CSS/background-size) value.
 -}
-cover : Value { lengthOrAutoOrCoverOrContain : Compatible }
+cover : LengthOrAutoOrCoverOrContain {}
 cover =
     Value "cover"
 
 
 {-| The `contain` [`background-size`](https://developer.mozilla.org/en-US/docs/Web/CSS/background-size) value.
 -}
-contain : Value { lengthOrAutoOrCoverOrContain : Compatible }
+contain : LengthOrAutoOrCoverOrContain {}
 contain =
     Value "contain"
 
@@ -4048,8 +4044,8 @@ float fn =
 
 -}
 textDecorationColor : Color -> Style
-textDecorationColor (Value color) =
-    property "text-decoration-color" color
+textDecorationColor =
+    prop1 "text-decoration-color"
 
 
 {-| Sets ['text-emphasis-color'](https://developer.mozilla.org/en-US/docs/Web/CSS/text-emphasis-color)
@@ -4058,8 +4054,8 @@ textDecorationColor (Value color) =
 
 -}
 textEmphasisColor : Color -> Style
-textEmphasisColor (Value color) =
-    property "text-emphasis-color" color
+textEmphasisColor =
+    prop1 "text-emphasis-color"
 
 
 {-| Sets [`text-align-last`](https://developer.mozilla.org/en-US/docs/Web/CSS/text-align-last).
@@ -5638,8 +5634,8 @@ borderImageWidth4 =
 
 -}
 borderBlockStartColor : Color -> Style
-borderBlockStartColor (Value color) =
-    property "border-block-start-color" color
+borderBlockStartColor =
+    prop1 "border-block-start-color"
 
 
 {-| Sets [`border-bottom-color`](https://developer.mozilla.org/en-US/docs/Web/CSS/border-bottom-color)
@@ -5648,8 +5644,8 @@ borderBlockStartColor (Value color) =
 
 -}
 borderBottomColor : Color -> Style
-borderBottomColor (Value color) =
-    property "border-bottom-color" color
+borderBottomColor =
+    prop1 "border-bottom-color"
 
 
 {-| Sets [`border-inline-start-color`](https://developer.mozilla.org/en-US/docs/Web/CSS/border-inline-start-color)
@@ -5658,8 +5654,8 @@ borderBottomColor (Value color) =
 
 -}
 borderInlineStartColor : Color -> Style
-borderInlineStartColor (Value color) =
-    property "border-inline-start-color" color
+borderInlineStartColor =
+    prop1 "border-inline-start-color"
 
 
 {-| Sets [`border-inline-end-color`](https://developer.mozilla.org/en-US/docs/Web/CSS/border-inline-end-color)
@@ -5668,8 +5664,8 @@ borderInlineStartColor (Value color) =
 
 -}
 borderInlineEndColor : Color -> Style
-borderInlineEndColor (Value color) =
-    property "border-inline-end-color" color
+borderInlineEndColor =
+    prop1 "border-inline-end-color"
 
 
 {-| Sets [`border-left-color`](https://developer.mozilla.org/en-US/docs/Web/CSS/border-left-color)
@@ -5678,8 +5674,8 @@ borderInlineEndColor (Value color) =
 
 -}
 borderLeftColor : Color -> Style
-borderLeftColor (Value color) =
-    property "border-left-color" color
+borderLeftColor =
+    prop1 "border-left-color"
 
 
 {-| Sets [`border-right-color`](https://developer.mozilla.org/en-US/docs/Web/CSS/border-right-color)
@@ -5688,8 +5684,8 @@ borderLeftColor (Value color) =
 
 -}
 borderRightColor : Color -> Style
-borderRightColor (Value color) =
-    property "border-right-color" color
+borderRightColor =
+    prop1 "border-right-color"
 
 
 {-| Sets [`border-top-color`](https://developer.mozilla.org/en-US/docs/Web/CSS/border-top-color)
@@ -5698,8 +5694,8 @@ borderRightColor (Value color) =
 
 -}
 borderTopColor : Color -> Style
-borderTopColor (Value color) =
-    property "border-top-color" color
+borderTopColor =
+    prop1 "border-top-color"
 
 
 {-| Sets [`border-block-end-color`](https://developer.mozilla.org/en-US/docs/Web/CSS/border-block-end-color)
@@ -5708,8 +5704,8 @@ borderTopColor (Value color) =
 
 -}
 borderBlockEndColor : Color -> Style
-borderBlockEndColor (Value color) =
-    property "border-block-end-color" color
+borderBlockEndColor =
+    prop1 "border-block-end-color"
 
 
 {-| Sets [`border-block-end-style`](https://developer.mozilla.org/en-US/docs/Web/CSS/border-block-end-style)
@@ -6097,8 +6093,8 @@ borderSpacing2 =
 
 -}
 borderColor : Color -> Style
-borderColor (Value color) =
-    property "border-color" color
+borderColor =
+    prop1 "border-color"
 
 
 {-| Sets [`border-color`](https://developer.mozilla.org/en-US/docs/Web/CSS/border-color)
@@ -6177,9 +6173,9 @@ outline3 =
     outlineColor (hsla 120 0.5 0.5 0.5)
 
 -}
-outlineColor : ColorValue compatibleE -> Style
-outlineColor (Value color) =
-    property "outline-color" color
+outlineColor : ColorValue compatible -> Style
+outlineColor =
+    prop1 "outline-color"
 
 
 {-| Sets [`outline-width`](https://developer.mozilla.org/en-US/docs/Web/CSS/outline-width)
@@ -6268,8 +6264,8 @@ whiteSpace =
 
 {-| -}
 backgroundColor : Color -> Style
-backgroundColor (Value color) =
-    property "background-color" color
+backgroundColor =
+    prop1 "background-color"
 
 
 {-| Sets ['background-repeat'](https://developer.mozilla.org/en-US/docs/Web/CSS/background-repeat)
@@ -6388,8 +6384,8 @@ backgroundSize2 =
 
 {-| -}
 color : ColorValue compatible -> Style
-color (Value color) =
-    property "color" color
+color =
+    prop1 "color"
 
 
 
@@ -6466,8 +6462,8 @@ fontFamilies =
 
 -}
 fontFeatureSettings : FeatureTagValue compatible -> Style
-fontFeatureSettings (Value value) =
-    property "font-feature-settings" value
+fontFeatureSettings =
+    prop1 "font-feature-settings"
 
 
 {-| Sets [`font-feature-settings`](https://developer.mozilla.org/en-US/docs/Web/CSS/font-feature-settings)
@@ -6511,8 +6507,8 @@ fontStyle =
 
 -}
 fontWeight : FontWeight compatible -> Style
-fontWeight (Value value) =
-    property "font-weight" value
+fontWeight =
+    prop1 "font-weight"
 
 
 {-| Sets [`font-variant`](https://developer.mozilla.org/en-US/docs/Web/CSS/font-variant)
@@ -7487,7 +7483,7 @@ numericalPercentageToString value =
     value |> (*) 100 |> numberToString |> flip (++) "%"
 
 
-valuesOrNone : List (Value compatible) -> Value compatible
+valuesOrNone : List (Value compatible) -> Value {}
 valuesOrNone list =
     if List.isEmpty list then
         Value "none"
@@ -7498,7 +7494,7 @@ valuesOrNone list =
             |> Value
 
 
-stringsToValue : List String -> Value compatible
+stringsToValue : List String -> Value {}
 stringsToValue list =
     if List.isEmpty list then
         Value "none"

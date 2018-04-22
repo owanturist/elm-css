@@ -1,51 +1,27 @@
-module Colors exposing (..)
+module Colors exposing (hexTests)
 
-import Css exposing (..)
+import Css exposing (hex)
 import Expect
-import Test exposing (..)
+import Test exposing (Test, describe, test)
 
 
 hexTests : Test
 hexTests =
     describe "hex color mixing"
-        [ test "fff works" <|
+        [ test "short hashless color" <|
             \() ->
                 hex "fff"
                     |> Expect.equal (hex "#fff")
-        , test "#fff works" <|
+        , test "long hashless color" <|
             \() ->
-                hex "#fff"
-                    |> Expect.equal (hex "#fff")
-        , test "000 works" <|
-            \() ->
-                hex "000"
-                    |> Expect.equal (hex "#000")
-        , test "#0f0 works" <|
-            \() ->
-                hex "#0f0"
-                    |> Expect.equal (hex "#0f0")
-        , test "#00f works" <|
-            \() ->
-                hex "#00f"
-                    |> Expect.equal (hex "#00f")
-        , test "#f00 works" <|
-            \() ->
-                hex "#f00"
-                    |> Expect.equal (hex "#f00")
-        , test "#000 works" <|
+                hex "0ff000"
+                    |> Expect.equal (hex "#0ff000")
+        , test "short hash color" <|
             \() ->
                 hex "#000"
                     |> Expect.equal (hex "#000")
-        , test "#0000 works" <|
+        , test "long hash color" <|
             \() ->
-                hex "#0000"
-                    |> Expect.equal (hex "#0000")
-        , test "#000f works" <|
-            \() ->
-                hex "#000f"
-                    |> Expect.equal (hex "#000f")
-        , test "#012345678 works" <|
-            \() ->
-                hex "#012345678"
-                    |> Expect.equal (hex "#012345678")
+                hex "#f00fff"
+                    |> Expect.equal (hex "#f00fff")
         ]

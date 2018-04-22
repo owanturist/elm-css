@@ -1038,11 +1038,10 @@ deprecated or discouraged.
 
 -}
 
-import Css.Helpers exposing (identifierToString, toCssIdentifier)
-import Css.Preprocess as Preprocess exposing (Style, unwrapSnippet)
+import Css.Helpers exposing (identifierToString)
+import Css.Preprocess as Preprocess
 import Css.Structure as Structure exposing (Property, Value(Value))
 import Hex
-import Regex exposing (regex)
 import String
 
 
@@ -1364,53 +1363,8 @@ colorValueForOverloadedProperty =
 
 
 {-| -}
-type Color
-    = RgbColor Int Int Int
-    | RgbaColor Int Int Int Float
-    | HslColor Float Float Float
-    | HslaColor Float Float Float Float
-    | HexColor String
-    | TransparentColor
-    | CurrentColor
-
-
-colorToString : Color -> String
-colorToString color =
-    case color of
-        RgbColor red green blue ->
-            cssFunction "rgb" (List.map numberToString [ red, green, blue ])
-
-        RgbaColor red green blue alpha ->
-            cssFunction "rgba" (List.map numberToString [ red, green, blue ] ++ [ numberToString alpha ])
-
-        HslColor hue saturation lightness ->
-            [ numberToString hue
-            , numericalPercentageToString saturation
-            , numericalPercentageToString lightness
-            ]
-                |> cssFunction "hsl"
-
-        HslaColor hue saturation lightness alpha ->
-            [ numberToString hue
-            , numericalPercentageToString saturation
-            , numericalPercentageToString lightness
-            , numberToString alpha
-            ]
-                |> cssFunction "hsla"
-
-        HexColor hex ->
-            "#" ++ hex
-
-        TransparentColor ->
-            "transparent"
-
-        CurrentColor ->
-            "currentColor"
-
-
-colorToValue : Color -> Value {}
-colorToValue =
-    Value << colorToString
+type alias Color =
+    ColorValue {}
 
 
 {-| <https://developer.mozilla.org/en-US/docs/Web/CSS/background-repeat#repeat-style>
@@ -1793,7 +1747,7 @@ makeImportant str =
 -}
 transparent : Color
 transparent =
-    TransparentColor
+    Value "transparent"
 
 
 {-| The [`currentColor`](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value#currentColor_keyword)
@@ -1801,7 +1755,7 @@ value.
 -}
 currentColor : Color
 currentColor =
-    CurrentColor
+    Value "currentColor"
 
 
 {-| This can represent:
@@ -2079,15 +2033,21 @@ initial =
 in functional notation.
 -}
 rgb : Int -> Int -> Int -> Color
-rgb =
-    RgbColor
+rgb red green blue =
+    [ red, green, blue ]
+        |> List.map numberToString
+        |> cssFunction "rgb"
+        |> Value
 
 
 {-| [RGBA color value](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value#rgba()).
 -}
 rgba : Int -> Int -> Int -> Float -> Color
-rgba =
-    RgbaColor
+rgba red green blue alpha =
+    List.map numberToString [ red, green, blue ]
+        ++ [ numberToString alpha ]
+        |> cssFunction "rgba"
+        |> Value
 
 
 {-| [HSL color value](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value#hsl())
@@ -2095,8 +2055,13 @@ rgba =
 to the appropriate percentage at compile-time
 -}
 hsl : Float -> Float -> Float -> Color
-hsl =
-    HslColor
+hsl hue saturation lightness =
+    [ numberToString hue
+    , numericalPercentageToString saturation
+    , numericalPercentageToString lightness
+    ]
+        |> cssFunction "hsl"
+        |> Value
 
 
 {-| [HSLA color value](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value#hsla())
@@ -2104,8 +2069,14 @@ hsl =
 to the appropriate percentage at compile-time
 -}
 hsla : Float -> Float -> Float -> Float -> Color
-hsla =
-    HslaColor
+hsla hue saturation lightness alpha =
+    [ numberToString hue
+    , numericalPercentageToString saturation
+    , numericalPercentageToString lightness
+    , numberToString alpha
+    ]
+        |> cssFunction "hsla"
+        |> Value
 
 
 {-| [RGB color value](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value#rgb())
@@ -2115,21 +2086,10 @@ tools which express these as e.g. `#abcdef0`, etc.
 -}
 hex : String -> Color
 hex str =
-    let
-        stringWithoutHash =
-            Regex.replace Regex.All (regex "^#") (always "") str
-    in
-    case String.toList stringWithoutHash of
-        [ r, g, b, a ] ->
-            hexaToRgba str ( r, r ) ( g, g ) ( b, b ) ( a, a )
-                |> Result.withDefault (HexColor str)
-
-        [ r1, r2, g1, g2, b1, b2, a1, a2 ] ->
-            hexaToRgba str ( r1, r2 ) ( g1, g2 ) ( b1, b2 ) ( a1, a2 )
-                |> Result.withDefault (HexColor str)
-
-        _ ->
-            HexColor stringWithoutHash
+    if String.startsWith "#" str then
+        Value str
+    else
+        Value ("#" ++ str)
 
 
 hexaToRgba : String -> ( Char, Char ) -> ( Char, Char ) -> ( Char, Char ) -> ( Char, Char ) -> Result String Color
@@ -2147,7 +2107,7 @@ hexaToRgba str ( r1, r2 ) ( g1, g2 ) ( b1, b2 ) ( a1, a2 ) =
     in
     case results of
         ( Ok red, Ok green, Ok blue, Ok alpha ) ->
-            Ok (RgbaColor red green blue (toFloat alpha / 255))
+            Ok (rgba red green blue (toFloat alpha / 255))
 
         _ ->
             Err ("Invalid hex color: `" ++ str ++ "`")
@@ -3720,13 +3680,13 @@ linearGradient2 (Value dir) stop1 stop2 stops =
 collectStops : List (ColorStop compatible unit) -> List String
 collectStops =
     List.map
-        (\( color, len ) ->
+        (\( Value color, len ) ->
             case len of
                 Nothing ->
-                    colorToString color
+                    color
 
                 Just (Value len) ->
-                    colorToString color ++ " " ++ len
+                    color ++ " " ++ len
         )
 
 
@@ -4098,8 +4058,8 @@ float fn =
 
 -}
 textDecorationColor : Color -> Style
-textDecorationColor =
-    property "text-decoration-color" << colorToString
+textDecorationColor (Value color) =
+    property "text-decoration-color" color
 
 
 {-| Sets ['text-emphasis-color'](https://developer.mozilla.org/en-US/docs/Web/CSS/text-emphasis-color)
@@ -4108,8 +4068,8 @@ textDecorationColor =
 
 -}
 textEmphasisColor : Color -> Style
-textEmphasisColor =
-    property "text-emphasis-color" << colorToString
+textEmphasisColor (Value color) =
+    property "text-emphasis-color" color
 
 
 {-| Sets [`text-align-last`](https://developer.mozilla.org/en-US/docs/Web/CSS/text-align-last).
@@ -4196,8 +4156,8 @@ textShadow2 =
 
 -}
 textShadow3 : Length compatibleA unitsA -> Length compatibleB unitsB -> Color -> Style
-textShadow3 argA argB color =
-    prop3 "text-shadow" argA argB (colorToValue color)
+textShadow3 =
+    prop3 "text-shadow"
 
 
 {-| Sets [`text-shadow`](https://developer.mozilla.org/en-US/docs/Web/CSS/text-shadow).
@@ -4209,8 +4169,8 @@ textShadow3 argA argB color =
 
 -}
 textShadow4 : Length compatibleA unitsA -> Length compatibleB unitsB -> Length compatibleC unitsC -> Color -> Style
-textShadow4 argA argB argC color =
-    prop4 "text-shadow" argA argB argC (colorToValue color)
+textShadow4 =
+    prop4 "text-shadow"
 
 
 {-| Sets [`box-shadow`](https://developer.mozilla.org/en-US/docs/Web/CSS/box-shadow).
@@ -4314,8 +4274,8 @@ boxShadow4 =
 
 -}
 boxShadow5 : Value a -> Length compatibleB unitsB -> Length compatibleC unitsC -> Length compatibleD unitsD -> Color -> Style
-boxShadow5 argA argB argC argD color =
-    prop5 "box-shadow" argA argB argC argD (colorToValue color)
+boxShadow5 =
+    prop5 "box-shadow"
 
 
 {-| Sets [`box-shadow`](https://developer.mozilla.org/en-US/docs/Web/CSS/box-shadow).
@@ -4335,8 +4295,8 @@ boxShadow5 argA argB argC argD color =
 
 -}
 boxShadow6 : Value a -> Length compatibleB unitsB -> Length compatibleC unitsC -> Length compatibleD unitsD -> Length compatibleE unitsE -> Color -> Style
-boxShadow6 argA argB argC argD argE color =
-    prop6 "box-shadow" argA argB argC argD argE (colorToValue color)
+boxShadow6 =
+    prop6 "box-shadow"
 
 
 {-| Sets [`text-indent`](https://developer.mozilla.org/en-US/docs/Web/CSS/text-indent).
@@ -5286,8 +5246,8 @@ border2 =
 
 -}
 border3 : Length compatibleA unitsA -> BorderStyle compatibleB -> Color -> Style
-border3 argA argB color =
-    prop3 "border" argA argB (colorToValue color)
+border3 =
+    prop3 "border"
 
 
 {-| Sets [`border-top`](https://developer.mozilla.org/en-US/docs/Web/CSS/border-top)
@@ -5322,8 +5282,8 @@ borderTop2 =
 
 -}
 borderTop3 : Length compatibleA unitsA -> BorderStyle compatibleB -> Color -> Style
-borderTop3 argA argB color =
-    prop3 "border-top" argA argB (colorToValue color)
+borderTop3 =
+    prop3 "border-top"
 
 
 {-| Sets [`border-bottom`](https://developer.mozilla.org/en-US/docs/Web/CSS/border-bottom)
@@ -5358,8 +5318,8 @@ borderBottom2 =
 
 -}
 borderBottom3 : Length compatibleA unitsA -> BorderStyle compatibleB -> Color -> Style
-borderBottom3 argA argB color =
-    prop3 "border-bottom" argA argB (colorToValue color)
+borderBottom3 =
+    prop3 "border-bottom"
 
 
 {-| Sets [`border-left`](https://developer.mozilla.org/en-US/docs/Web/CSS/border-left)
@@ -5394,8 +5354,8 @@ borderLeft2 =
 
 -}
 borderLeft3 : Length compatibleA unitsA -> BorderStyle compatibleB -> Color -> Style
-borderLeft3 argA argB color =
-    prop3 "border-left" argA argB (colorToValue color)
+borderLeft3 =
+    prop3 "border-left"
 
 
 {-| Sets [`border-right`](https://developer.mozilla.org/en-US/docs/Web/CSS/border-right)
@@ -5430,8 +5390,8 @@ borderRight2 =
 
 -}
 borderRight3 : Length compatibleA unitsA -> BorderStyle compatibleB -> Color -> Style
-borderRight3 argA argB color =
-    prop3 "border-right" argA argB (colorToValue color)
+borderRight3 =
+    prop3 "border-right"
 
 
 {-| Sets [`border-block-start`](https://developer.mozilla.org/en-US/docs/Web/CSS/border-block-start)
@@ -5466,8 +5426,8 @@ borderBlockStart2 =
 
 -}
 borderBlockStart3 : Length compatibleA units -> BorderStyle compatibleB -> Color -> Style
-borderBlockStart3 argA argB color =
-    prop3 "border-block-start" argA argB (colorToValue color)
+borderBlockStart3 =
+    prop3 "border-block-start"
 
 
 {-| Sets [`border-block-end`](https://developer.mozilla.org/en-US/docs/Web/CSS/border-block-end)
@@ -5502,8 +5462,8 @@ borderBlockEnd2 =
 
 -}
 borderBlockEnd3 : Length compatibleA unitsA -> BorderStyle compatibleB -> Color -> Style
-borderBlockEnd3 argA argB color =
-    prop3 "border-block-end" argA argB (colorToValue color)
+borderBlockEnd3 =
+    prop3 "border-block-end"
 
 
 {-| Sets [`border-block-start`](https://developer.mozilla.org/en-US/docs/Web/CSS/border-block-start)
@@ -5538,8 +5498,8 @@ borderInlineStart2 =
 
 -}
 borderInlineStart3 : Length compatibleA unitsA -> BorderStyle compatibleB -> Color -> Style
-borderInlineStart3 argA argB color =
-    prop3 "border-block-start" argA argB (colorToValue color)
+borderInlineStart3 =
+    prop3 "border-block-start"
 
 
 {-| Sets [`border-block-end`](https://developer.mozilla.org/en-US/docs/Web/CSS/border-block-end)
@@ -5574,8 +5534,8 @@ borderInlineEnd2 =
 
 -}
 borderInlineEnd3 : Length compatibleA unitsA -> BorderStyle compatibleB -> Color -> Style
-borderInlineEnd3 argA argB color =
-    prop3 "border-block-end" argA argB (colorToValue color)
+borderInlineEnd3 =
+    prop3 "border-block-end"
 
 
 {-| Sets [`border-image-outset`](https://developer.mozilla.org/en-US/docs/Web/CSS/border-image-outset)
@@ -5688,8 +5648,8 @@ borderImageWidth4 =
 
 -}
 borderBlockStartColor : Color -> Style
-borderBlockStartColor =
-    property "border-block-start-color" << colorToString
+borderBlockStartColor (Value color) =
+    property "border-block-start-color" color
 
 
 {-| Sets [`border-bottom-color`](https://developer.mozilla.org/en-US/docs/Web/CSS/border-bottom-color)
@@ -5698,8 +5658,8 @@ borderBlockStartColor =
 
 -}
 borderBottomColor : Color -> Style
-borderBottomColor =
-    property "border-bottom-color" << colorToString
+borderBottomColor (Value color) =
+    property "border-bottom-color" color
 
 
 {-| Sets [`border-inline-start-color`](https://developer.mozilla.org/en-US/docs/Web/CSS/border-inline-start-color)
@@ -5708,8 +5668,8 @@ borderBottomColor =
 
 -}
 borderInlineStartColor : Color -> Style
-borderInlineStartColor =
-    property "border-inline-start-color" << colorToString
+borderInlineStartColor (Value color) =
+    property "border-inline-start-color" color
 
 
 {-| Sets [`border-inline-end-color`](https://developer.mozilla.org/en-US/docs/Web/CSS/border-inline-end-color)
@@ -5718,8 +5678,8 @@ borderInlineStartColor =
 
 -}
 borderInlineEndColor : Color -> Style
-borderInlineEndColor =
-    property "border-inline-end-color" << colorToString
+borderInlineEndColor (Value color) =
+    property "border-inline-end-color" color
 
 
 {-| Sets [`border-left-color`](https://developer.mozilla.org/en-US/docs/Web/CSS/border-left-color)
@@ -5728,8 +5688,8 @@ borderInlineEndColor =
 
 -}
 borderLeftColor : Color -> Style
-borderLeftColor =
-    property "border-left-color" << colorToString
+borderLeftColor (Value color) =
+    property "border-left-color" color
 
 
 {-| Sets [`border-right-color`](https://developer.mozilla.org/en-US/docs/Web/CSS/border-right-color)
@@ -5738,8 +5698,8 @@ borderLeftColor =
 
 -}
 borderRightColor : Color -> Style
-borderRightColor =
-    property "border-right-color" << colorToString
+borderRightColor (Value color) =
+    property "border-right-color" color
 
 
 {-| Sets [`border-top-color`](https://developer.mozilla.org/en-US/docs/Web/CSS/border-top-color)
@@ -5748,8 +5708,8 @@ borderRightColor =
 
 -}
 borderTopColor : Color -> Style
-borderTopColor =
-    property "border-top-color" << colorToString
+borderTopColor (Value color) =
+    property "border-top-color" color
 
 
 {-| Sets [`border-block-end-color`](https://developer.mozilla.org/en-US/docs/Web/CSS/border-block-end-color)
@@ -5758,8 +5718,8 @@ borderTopColor =
 
 -}
 borderBlockEndColor : Color -> Style
-borderBlockEndColor =
-    property "border-block-end-color" << colorToString
+borderBlockEndColor (Value color) =
+    property "border-block-end-color" color
 
 
 {-| Sets [`border-block-end-style`](https://developer.mozilla.org/en-US/docs/Web/CSS/border-block-end-style)
@@ -6147,8 +6107,8 @@ borderSpacing2 =
 
 -}
 borderColor : Color -> Style
-borderColor =
-    property "border-color" << colorToString
+borderColor (Value color) =
+    property "border-color" color
 
 
 {-| Sets [`border-color`](https://developer.mozilla.org/en-US/docs/Web/CSS/border-color)
@@ -6160,9 +6120,8 @@ borderColor =
 
 -}
 borderColor2 : Color -> Color -> Style
-borderColor2 c1 c2 =
+borderColor2 (Value c1) (Value c2) =
     [ c1, c2 ]
-        |> List.map colorToString
         |> String.join ""
         |> property "border-color"
 
@@ -6176,9 +6135,8 @@ borderColor2 c1 c2 =
 
 -}
 borderColor3 : Color -> Color -> Color -> Style
-borderColor3 c1 c2 c3 =
+borderColor3 (Value c1) (Value c2) (Value c3) =
     [ c1, c2, c3 ]
-        |> List.map colorToString
         |> String.join " "
         |> property "border-color"
 
@@ -6192,9 +6150,8 @@ borderColor3 c1 c2 c3 =
 
 -}
 borderColor4 : Color -> Color -> Color -> Color -> Style
-borderColor4 c1 c2 c3 c4 =
+borderColor4 (Value c1) (Value c2) (Value c3) (Value c4) =
     [ c1, c2, c3, c4 ]
-        |> List.map colorToString
         |> String.join " "
         |> property "border-color"
 
@@ -6219,8 +6176,8 @@ outline =
 
 -}
 outline3 : Length compatibleA unitsA -> BorderStyle compatibleB -> Color -> Style
-outline3 argA argB color =
-    prop3 "outline" argA argB (colorToValue color)
+outline3 =
+    prop3 "outline"
 
 
 {-| Sets [`outline-color`](https://developer.mozilla.org/en-US/docs/Web/CSS/outline-color)
@@ -6230,9 +6187,9 @@ outline3 argA argB color =
     outlineColor (hsla 120 0.5 0.5 0.5)
 
 -}
-outlineColor : Color -> Style
-outlineColor =
-    property "outline-color" << colorToString
+outlineColor : ColorValue compatibleE -> Style
+outlineColor (Value color) =
+    property "outline-color" color
 
 
 {-| Sets [`outline-width`](https://developer.mozilla.org/en-US/docs/Web/CSS/outline-width)
@@ -6280,7 +6237,7 @@ resize =
 {-| -}
 fill : Color -> Style
 fill =
-    prop1 "fill" << colorToValue
+    prop1 "fill"
 
 
 {-| -}
@@ -6321,8 +6278,8 @@ whiteSpace =
 
 {-| -}
 backgroundColor : Color -> Style
-backgroundColor =
-    property "background-color" << colorToString
+backgroundColor (Value color) =
+    property "background-color" color
 
 
 {-| Sets ['background-repeat'](https://developer.mozilla.org/en-US/docs/Web/CSS/background-repeat)
@@ -6440,9 +6397,9 @@ backgroundSize2 =
 
 
 {-| -}
-color : Color -> Style
-color =
-    property "color" << colorToString
+color : ColorValue compatible -> Style
+color (Value color) =
+    property "color" color
 
 
 
@@ -6903,8 +6860,8 @@ You can specify multiple line decorations with `textDecorations`.
 
 -}
 textDecoration3 : TextDecorationLine compatibleA -> TextDecorationStyle compatibleB -> Color -> Style
-textDecoration3 argA argB color =
-    prop3 "text-decoration" argA argB (colorToValue color)
+textDecoration3 =
+    prop3 "text-decoration"
 
 
 {-| Sets [`text-decoration`](https://developer.mozilla.org/en-US/docs/Web/CSS/text-decoration)
@@ -6939,8 +6896,8 @@ textDecorations2 =
 
 -}
 textDecorations3 : List (TextDecorationLine compatibleA) -> TextDecorationStyle compatibleB -> Color -> Style
-textDecorations3 argA argB color =
-    prop3 "text-decoration" (valuesOrNone argA) argB (colorToValue color)
+textDecorations3 =
+    prop3 "text-decoration" << valuesOrNone
 
 
 {-| Sets [`text-decoration-line`](https://developer.mozilla.org/en-US/docs/Web/CSS/text-decoration-line)

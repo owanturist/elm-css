@@ -1041,7 +1041,6 @@ deprecated or discouraged.
 import Css.Helpers exposing (identifierToString)
 import Css.Preprocess as Preprocess
 import Css.Structure as Structure exposing (Property, Value(Value))
-import Hex
 import String
 
 
@@ -2090,27 +2089,6 @@ hex str =
         Value str
     else
         Value ("#" ++ str)
-
-
-hexaToRgba : String -> ( Char, Char ) -> ( Char, Char ) -> ( Char, Char ) -> ( Char, Char ) -> Result String Color
-hexaToRgba str ( r1, r2 ) ( g1, g2 ) ( b1, b2 ) ( a1, a2 ) =
-    let
-        toResult =
-            String.fromList >> String.toLower >> Hex.fromString
-
-        results =
-            ( toResult [ r1, r2 ]
-            , toResult [ g1, g2 ]
-            , toResult [ b1, b2 ]
-            , toResult [ a1, a2 ]
-            )
-    in
-    case results of
-        ( Ok red, Ok green, Ok blue, Ok alpha ) ->
-            Ok (rgba red green blue (toFloat alpha / 255))
-
-        _ ->
-            Err ("Invalid hex color: `" ++ str ++ "`")
 
 
 

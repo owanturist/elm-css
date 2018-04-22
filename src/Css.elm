@@ -5,6 +5,7 @@ module Css
         , Angle
         , AngleOrDirection
         , BackgroundAttachment
+        , BackgroundBlendMode
         , BackgroundClip
         , BackgroundImage
         , BackgroundOrigin
@@ -1020,7 +1021,7 @@ functions let you define custom properties and selectors, respectively.
 @docs listStyle, listStyle2, listStyle3
 @docs linearGradient, linearGradient2, stop, stop2, toBottom, toBottomLeft, toBottomRight, toLeft, toRight, toTop, toTopLeft, toTopRight
 
-@docs AlignItems, All, Angle, AngleOrDirection, BackgroundAttachment, BackgroundClip, BackgroundImage, BackgroundOrigin, BackgroundRepeat, BackgroundRepeatShorthand, BasicProperty, BorderCollapse, BorderStyle, BoxSizing, Calc, CalcExpression, Cursor, Directionality, Display, ExplicitLength, FeatureTagValue, FlexBasis, FlexDirection, FlexDirectionOrWrap, FlexWrap, FontFamily, FontStyle, FontStyleOrFeatureTagValue, FontVariant, FontVariantCaps, FontVariantLigatures, FontVariantNumeric, FontWeight, ImportType, IncompatibleUnits, JustifyContent, LengthOrAuto, LengthOrAutoOrCoverOrContain, LengthOrMinMaxDimension, LengthOrNone, LengthOrNoneOrMinMaxDimension, LengthOrNumber, LengthOrNumberOrAutoOrNoneOrContent, ListStyle, ListStylePosition, ListStyleType, MinMaxDimension, None, Number, Outline, Overflow, Visibility, Position, Resize, TableLayout, TextDecorationLine, TextDecorationStyle, TextIndent, TextOrientation, TextOverflow, TextRendering, TextTransform, TouchAction, Transform, TransformBox, TransformStyle, Value, VerticalAlign, WhiteSpace, Wrap, pre, preLine, preWrap
+@docs AlignItems, All, Angle, AngleOrDirection, BackgroundAttachment, BackgroundBlendMode, BackgroundClip, BackgroundImage, BackgroundOrigin, BackgroundRepeat, BackgroundRepeatShorthand, BasicProperty, BorderCollapse, BorderStyle, BoxSizing, Calc, CalcExpression, Cursor, Directionality, Display, ExplicitLength, FeatureTagValue, FlexBasis, FlexDirection, FlexDirectionOrWrap, FlexWrap, FontFamily, FontStyle, FontStyleOrFeatureTagValue, FontVariant, FontVariantCaps, FontVariantLigatures, FontVariantNumeric, FontWeight, ImportType, IncompatibleUnits, JustifyContent, LengthOrAuto, LengthOrAutoOrCoverOrContain, LengthOrMinMaxDimension, LengthOrNone, LengthOrNoneOrMinMaxDimension, LengthOrNumber, LengthOrNumberOrAutoOrNoneOrContent, ListStyle, ListStylePosition, ListStyleType, MinMaxDimension, None, Number, Outline, Overflow, Visibility, Position, Resize, TableLayout, TextDecorationLine, TextDecorationStyle, TextIndent, TextOrientation, TextOverflow, TextRendering, TextTransform, TouchAction, Transform, TransformBox, TransformStyle, Value, VerticalAlign, WhiteSpace, Wrap, pre, preLine, preWrap
 
 
 # Types
@@ -1387,6 +1388,17 @@ type alias BackgroundAttachment compatible =
 -}
 type alias BackgroundPosition compatible =
     Value { compatible | backgroundPosition : Compatible }
+
+
+{-| Because `color` is both a common propertie and common value
+in CSS (e.g. `color: red` with and `background-blend-mode: color`),
+we implement it as a property (for the `color: red` case) and allow it to
+be used as a value as well. When being used as a value, we call it, expect
+that it will return the desired String as its key, and use that as our value.
+(See `getOverloadedProperty`. Note that `VerticalAlign`.)
+-}
+type alias BackgroundBlendMode compatible =
+    ColorValue compatible -> Style
 
 
 {-| <https://developer.mozilla.org/en-US/docs/Web/CSS/background-clip>
@@ -1813,98 +1825,98 @@ vertical =
 
 {-| The `multiply` [`blend-mode`](https://developer.mozilla.org/en-US/docs/Web/CSS/blend-mode#multiply).
 -}
-multiply : ColorValue compatible -> Style
+multiply : BackgroundBlendMode compatible
 multiply =
     prop1 "multiply"
 
 
 {-| The `screen` [`blend-mode`](https://developer.mozilla.org/en-US/docs/Web/CSS/blend-mode#screen).
 -}
-screenBlendMode : ColorValue compatible -> Style
+screenBlendMode : BackgroundBlendMode compatible
 screenBlendMode =
     prop1 "screen"
 
 
 {-| The `overlay` [`blend-mode`](https://developer.mozilla.org/en-US/docs/Web/CSS/blend-mode#overlay).
 -}
-overlay : ColorValue compatible -> Style
+overlay : BackgroundBlendMode compatible
 overlay =
     prop1 "overlay"
 
 
 {-| The `darken` [`blend-mode`](https://developer.mozilla.org/en-US/docs/Web/CSS/blend-mode#darken).
 -}
-darken : ColorValue compatible -> Style
+darken : BackgroundBlendMode compatible
 darken =
     prop1 "darken"
 
 
 {-| The `lighten` [`blend-mode`](https://developer.mozilla.org/en-US/docs/Web/CSS/blend-mode#lighten).
 -}
-lighten : ColorValue compatible -> Style
+lighten : BackgroundBlendMode compatible
 lighten =
     prop1 "lighten"
 
 
 {-| The `color-dodge` [`blend-mode`](https://developer.mozilla.org/en-US/docs/Web/CSS/blend-mode#color-dodge).
 -}
-colorDodge : ColorValue compatible -> Style
+colorDodge : BackgroundBlendMode compatible
 colorDodge =
     prop1 "color-dodge"
 
 
 {-| The `color-burn` [`blend-mode`](https://developer.mozilla.org/en-US/docs/Web/CSS/blend-mode#color-burn).
 -}
-colorBurn : ColorValue compatible -> Style
+colorBurn : BackgroundBlendMode compatible
 colorBurn =
     prop1 "color-burn"
 
 
 {-| The `hard-light` [`blend-mode`](https://developer.mozilla.org/en-US/docs/Web/CSS/blend-mode#hard-light).
 -}
-hardLight : ColorValue compatible -> Style
+hardLight : BackgroundBlendMode compatible
 hardLight =
     prop1 "hard-light"
 
 
 {-| The `soft-light` [`blend-mode`](https://developer.mozilla.org/en-US/docs/Web/CSS/blend-mode#soft-light).
 -}
-softLight : ColorValue compatible -> Style
+softLight : BackgroundBlendMode compatible
 softLight =
     prop1 "soft-light"
 
 
 {-| The `difference` [`blend-mode`](https://developer.mozilla.org/en-US/docs/Web/CSS/blend-mode#difference).
 -}
-difference : ColorValue compatible -> Style
+difference : BackgroundBlendMode compatible
 difference =
     prop1 "difference"
 
 
 {-| The `exclusion` [`blend-mode`](https://developer.mozilla.org/en-US/docs/Web/CSS/blend-mode#exclusion).
 -}
-exclusion : ColorValue compatible -> Style
+exclusion : BackgroundBlendMode compatible
 exclusion =
     prop1 "exclusion"
 
 
 {-| The `hue` [`blend-mode`](https://developer.mozilla.org/en-US/docs/Web/CSS/blend-mode#hue).
 -}
-hue : ColorValue compatible -> Style
+hue : BackgroundBlendMode compatible
 hue =
     prop1 "hue"
 
 
 {-| The `saturation` [`blend-mode`](https://developer.mozilla.org/en-US/docs/Web/CSS/blend-mode#saturation).
 -}
-saturation : ColorValue compatible -> Style
+saturation : BackgroundBlendMode compatible
 saturation =
     prop1 "saturation"
 
 
 {-| The `luminosity` [`blend-mode`](https://developer.mozilla.org/en-US/docs/Web/CSS/blend-mode#luminosity).
 -}
-luminosity : ColorValue compatible -> Style
+luminosity : BackgroundBlendMode compatible
 luminosity =
     prop1 "luminosity"
 

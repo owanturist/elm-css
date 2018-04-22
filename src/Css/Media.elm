@@ -1,11 +1,21 @@
 module Css.Media
     exposing
-        ( Bits
+        ( AbsoluteLength
+        , Bits
+        , BlockAxisOverflow
+        , ColorGamut
         , Expression
+        , HoverCapability
+        , InlineAxisOverflow
         , MediaQuery
         , MediaType
+        , Orientation
+        , PointerDevice
         , Ratio
         , Resolution
+        , ScanningProcess
+        , ScriptingSupport
+        , UpdateFrequency
         , all
         , anyHover
         , anyPointer
@@ -95,35 +105,35 @@ module Css.Media
 
 # Viewport, Page Dimensions Media Features
 
-@docs minWidth, width, maxWidth, minHeight, height, maxHeight, Ratio, ratio
-@docs minAspectRatio, aspectRatio, maxAspectRatio
-@docs landscape, portrait, orientation
+@docs AbsoluteLength, minWidth, width, maxWidth, minHeight, height, maxHeight
+@docs Ratio, ratio, maxAspectRatio, minAspectRatio, aspectRatio
+@docs Orientation, landscape, portrait, orientation
 
 
 # Display Quality Media Features
 
 @docs Resolution, dpi, dpcm, dppx, minResolution, resolution, maxResolution
-@docs scan, progressive, interlace, scan, grid
-@docs slow, fast, update, paged, optionalPaged
-@docs overflowBlock, overflowInline
+@docs ScanningProcess, scan, progressive, interlace, scan, grid
+@docs UpdateFrequency, slow, fast, update, paged, optionalPaged
+@docs BlockAxisOverflow, InlineAxisOverflow, overflowBlock, overflowInline
 
 
 # Color Media Features
 
 @docs Bits, bits, minColor, color, maxColor, minMonochrome, monochrome
-@docs maxMonochrome, minColorIndex, colorIndex, maxColorIndex
-@docs srgb, p3, rec2020, colorGamut
+@docs maxColorIndex, maxMonochrome, minColorIndex, colorIndex
+@docs ColorGamut, srgb, p3, rec2020, colorGamut
 
 
 # Interaction Media Features
 
-@docs fine, coarse, pointer, anyPointer, canHover
-@docs hover, anyHover
+@docs PointerDevice, fine, coarse, pointer, anyPointer, canHover
+@docs HoverCapability, hover, anyHover
 
 
 # Scripting Media Features
 
-@docs initialOnly, enabled, scripting
+@docs ScriptingSupport, initialOnly, enabled, scripting
 
 -}
 
@@ -451,6 +461,7 @@ maxAspectRatio =
     feature "max-aspect-ratio"
 
 
+{-| -}
 type alias Orientation compatible =
     Value { compatible | orientation : Compatible }
 
@@ -550,6 +561,7 @@ maxResolution =
     feature "max-resolution"
 
 
+{-| -}
 type alias ScanningProcess compatible =
     Value { compatible | scanningProcess : Compatible }
 
@@ -584,6 +596,7 @@ grid =
     unparameterizedFeature "grid"
 
 
+{-| -}
 type alias UpdateFrequency compatible =
     Value { compatible | updateFrequency : Compatible }
 
@@ -610,6 +623,7 @@ update =
     feature "update"
 
 
+{-| -}
 type alias BlockAxisOverflow compatible =
     Value { compatible | blockAxisOverflow : Compatible }
 
@@ -636,6 +650,7 @@ overflowBlock =
     feature "overflow-block"
 
 
+{-| -}
 type alias InlineAxisOverflow compatible =
     Value { compatible | inlineAxisOverflow : Compatible }
 
@@ -756,6 +771,7 @@ maxColorIndex =
     feature "max-color-index"
 
 
+{-| -}
 type alias ColorGamut compatible =
     Value { compatible | colorGamut : Compatible }
 
